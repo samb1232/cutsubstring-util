@@ -39,15 +39,20 @@ public class Main {
     @Option(name = "-o")
     private String outputFileName;
 
-    @Option(name = "-file")
+    @Argument(index = 1)
     private String inputFileName;
 
-    @Argument(required = true, index = 0)
+    @Argument(required = true)
     private String range;
 
 
-    public static void main(String[] args) throws CmdLineException, IOException {
-        new Main().launch(args);
+    public static void main(String[] args) {
+        try {
+            new Main().launch(args);
+        } catch (CmdLineException | IOException exception) {
+            System.err.println(exception.getLocalizedMessage());
+            System.exit(1);
+        }
     }
 
     public void launch(String[] args) throws CmdLineException, IOException {
@@ -59,7 +64,36 @@ public class Main {
             parser.printUsage(System.err);
             System.exit(1);
         }
-        Cut core = new Cut(symbolFlag, wordFlag, outputFileName, inputFileName, range);
+
+        if (inputFileName != null) {
+            String t = range;
+            range = inputFileName;
+            inputFileName = t;
+        }
+
+
+        range = range.replaceAll("\"", "");
+        int rangeFrom;
+        int rangeTo;
+        boolean rangeToFlag = false;
+        if (range.matches("^\\d+-\\d+$")) {
+            rangeFrom = Integer.parseInt(range.split("-")[0]);
+            rangeTo = Integer.parseInt(range.split("-")[1]);
+            if (rangeFrom > rangeTo) {
+                throw new IllegalArgumentException("Incorrect range input");
+            }
+        } else if (range.matches("^-\\d+$")) {
+            rangeFrom = 0;
+            rangeTo = Integer.parseInt(range.split("-")[1]);
+        } else if (range.matches("^\\d+-$")) {
+            rangeFrom = Integer.parseInt(range.split("-")[0]);
+            rangeTo = -1;
+            rangeToFlag = true;
+        } else {
+            throw new IllegalArgumentException("Incorrect range input");
+        }
+
+        Cut core = new Cut(symbolFlag, wordFlag, outputFileName, inputFileName, rangeFrom, rangeTo, rangeToFlag);
         core.checker();
         core.doCut();
     }

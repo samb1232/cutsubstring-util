@@ -1,4 +1,5 @@
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Cut {
@@ -11,14 +12,21 @@ public class Cut {
 
     private final String inputFileName;
 
-    private final String range;
+    private final int rangeFrom;
 
-    public Cut(boolean symbolFlag, boolean wordFlag, String outputFileName, String inputFileName, String range) {
+    private int rangeTo;
+
+    private final boolean rangeToFlag;
+
+    public Cut(boolean symbolFlag, boolean wordFlag, String outputFileName, String inputFileName,
+               int rangeFrom, int rangeTo, boolean rangeToFlag) {
         this.symbolFlag = symbolFlag;
         this.wordFlag = wordFlag;
         this.outputFileName = outputFileName;
         this.inputFileName = inputFileName;
-        this.range = range.replaceAll("\"", "");
+        this.rangeFrom = rangeFrom;
+        this.rangeTo = rangeTo;
+        this.rangeToFlag = rangeToFlag;
     }
 
     public void checker() {
@@ -26,50 +34,19 @@ public class Cut {
             throw new IllegalArgumentException("Symbol or word flag is missing or they both given");
         }
 
-        if (outputFileName != null && !new File(outputFileName).exists()) {
-            throw new IllegalArgumentException("Output File is not exist");
-        }
-
         if (inputFileName != null && !new File(inputFileName).exists()) {
-            throw new IllegalArgumentException("Input File is not exist");
+            throw new IllegalArgumentException("Input File with such name is not exist");
         }
     }
 
     public void doCut() throws IOException {
-        int rangeFrom;
-        int rangeTo;
-        boolean rangeToFlag = false;
-        if (range.matches("^\\d+-\\d+$")) {
-            rangeFrom = Integer.parseInt(range.split("-")[0]);
-            rangeTo = Integer.parseInt(range.split("-")[1]);
-            if (rangeFrom > rangeTo) {
-                throw new IllegalArgumentException("Incorrect range input");
-            }
-        } else if (range.matches("^-\\d+$")) {
-            rangeFrom = 0;
-            rangeTo = Integer.parseInt(range.split("-")[1]);
-        } else if (range.matches("^\\d+-$")) {
-            rangeFrom = Integer.parseInt(range.split("-")[0]);
-            rangeTo = -1;
-            rangeToFlag = true;
-        } else {
-            throw new IllegalArgumentException("Incorrect range input");
-        }
-
         String[] textToCut;
         if (inputFileName != null) {
             File inputFile = new File(inputFileName);
-            textToCut = fileToStringArr(inputFile);
+            textToCut = fileToStringArr(inputFile).toArray(new String[0]);
         } else {
             Scanner in = new Scanner(System.in);
-            System.out.println("Введите текст: ");
-            String line;
-            StringBuilder lines = new StringBuilder();
-            do {
-                line = in.nextLine();
-                lines.append(line).append("\n");
-            } while(!line.equals(""));
-            textToCut = lines.toString().split("\n");
+            textToCut = in.next().split("\n");
         }
 
         StringBuilder cutText = new StringBuilder();
@@ -105,12 +82,12 @@ public class Cut {
     }
 
 
-    private String[] fileToStringArr(File file) throws FileNotFoundException {
-        StringBuilder retString = new StringBuilder();
+    private ArrayList<String> fileToStringArr(File file) throws FileNotFoundException {
+        ArrayList<String> retString = new ArrayList<>();
         Scanner scan = new Scanner(file);
         while (scan.hasNextLine()) {
-            retString.append(scan.nextLine()).append("\n");
+            retString.add(scan.nextLine());
         }
-        return retString.toString().split("\n");
+        return retString;
     }
 }
