@@ -40,14 +40,7 @@ public class Cut {
     }
 
     public void doCut() throws IOException {
-        String[] textToCut;
-        if (inputFileName != null) {
-            File inputFile = new File(inputFileName);
-            textToCut = fileToStringArr(inputFile).toArray(new String[0]);
-        } else {
-            Scanner in = new Scanner(System.in);
-            textToCut = in.next().split("\n");
-        }
+        ArrayList<String> textToCut = fileToStringArr();
 
         StringBuilder cutText = new StringBuilder();
 
@@ -62,7 +55,7 @@ public class Cut {
                 rangeTo = line.length - 1;
             }
             for (int i = rangeFrom; i <= rangeTo; i++) {
-                if (i == line.length) {
+                if (i >= line.length) {
                     break;
                 }
                 cutText.append(line[i]);
@@ -82,9 +75,16 @@ public class Cut {
     }
 
 
-    private ArrayList<String> fileToStringArr(File file) throws FileNotFoundException {
+    private ArrayList<String> fileToStringArr() {
+        Scanner scan;
+
+        if (inputFileName != null) {
+             scan = new Scanner(inputFileName);
+        } else {
+            scan = new Scanner(System.in);
+        }
         ArrayList<String> retString = new ArrayList<>();
-        Scanner scan = new Scanner(file);
+
         while (scan.hasNextLine()) {
             retString.add(scan.nextLine());
         }

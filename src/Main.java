@@ -49,13 +49,13 @@ public class Main {
     public static void main(String[] args) {
         try {
             new Main().launch(args);
-        } catch (CmdLineException | IOException exception) {
+        } catch (IOException | IllegalArgumentException exception) {
             System.err.println(exception.getLocalizedMessage());
             System.exit(1);
         }
     }
 
-    public void launch(String[] args) throws CmdLineException, IOException {
+    public void launch(String[] args) throws IOException {
         CmdLineParser parser = new CmdLineParser(this);
         try {
             parser.parseArgument(args);
